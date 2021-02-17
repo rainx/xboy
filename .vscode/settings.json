@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.cppm": "cpp",
+        "iostream": "cpp",
+        "array": "cpp",
+        "istream": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "bitset": "cpp",
+        "__functional_base": "cpp",
+        "locale": "cpp",
+        "memory": "cpp",
+        "__tuple": "cpp"
+    }
+}
