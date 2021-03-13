@@ -11,6 +11,7 @@ enable_testing()
 
 file(GLOB SOURCES
     src/mmu/*.cpp
+    src/mmu/cartridge/*.cpp
     src/cpu/*.cpp
 )
 

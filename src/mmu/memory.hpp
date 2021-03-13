@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mmu{
+namespace mmu {
 
 // General Memory Map
 // 0000-3FFF   16KB ROM Bank 00     (in cartridge, fixed at bank 00)
@@ -20,12 +20,12 @@ namespace mmu{
 //
 // See: http://bgb.bircd.org/pandocs.htm#cgbregisters
 class Memory {
-    public:
-        virtual uint8_t get(const uint16_t& address) const = 0;
-        virtual void set(const uint16_t& address, const uint8_t value) = 0;
-        virtual uint16_t getWord(const uint16_t& address) const;
-        virtual void setWord(const uint16_t& address, uint16_t value);;
+public:
+  virtual uint8_t get(const uint16_t &address) const = 0;
+  virtual void set(const uint16_t &address, const uint8_t value) = 0;
+  virtual uint16_t getWord(const uint16_t &address) const;
+  virtual void setWord(const uint16_t &address, uint16_t value);
+  ;
 };
 
 }; // namespace mmu
-

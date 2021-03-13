@@ -10,6 +10,9 @@
         "__functional_base": "cpp",
         "locale": "cpp",
         "memory": "cpp",
-        "__tuple": "cpp"
-    }
+        "__tuple": "cpp",
+        "iosfwd": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_path": "/usr/local/Cellar/clang-format/11.0.0/bin/clang-format"
 }
