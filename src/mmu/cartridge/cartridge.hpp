@@ -13,9 +13,11 @@
 //   - http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header
 //   - http://gbdev.gg8.se/wiki/articles/Memory_Bank_Controllers
 
-#include "mmu/memory.hpp"
 #include <array>
+#include <memory>
 #include <string>
+
+#include "mmu/memory.hpp"
 
 using std::array;
 using std::string;
@@ -72,21 +74,48 @@ enum CartridgeType {
   HuC1WithRamAndBattery = 0xff,
 };
 
-template <uint32_t MAX_ROM_SIZE = 0, uint32_t MAX_RAM_SIZE = 0>
 class Cartridge : Memory {
 public:
-  Cartridge(const CartridgeType cartridge_type, const array<MAX_ROM_SIZE> &rom,
-            const array<MAX_RAM_SIZE> &ram, const string &rom_path);
-  virtual ~Cartridge();
+  Cartridge(const CartridgeType cartridge_type, const string &rom_path)
+      : cartridge_type_(cartridge_type), rom_path_(rom_path){};
+  virtual ~Cartridge(){};
   virtual void save() = 0;
+  virtual CartridgeType getCartridgeType() { return cartridge_type_; };
   // Factory to return Correct Cartridge from rom
-  static Cartridge powerUp(const string &rom_path);
+  static std::shared_ptr<Cartridge> powerUp(const string &rom_path);
 
 protected:
   CartridgeType cartridge_type_;
   string rom_path_;
-  array<MAX_ROM_SIZE> rom_;
-  array<MAX_RAM_SIZE> ram_;
+};
+
+/**
+ * @brief All Rom based cartriges
+ *
+ * @tparam MAX_ROM_SIZE max rom size in bytes
+ * @tparam MAX_RAM_SIZE max ram size in bytes
+ */
+template <uint32_t MAX_ROM_SIZE = 0, uint32_t MAX_RAM_SIZE = 0>
+class RomBasedCartridge : Cartridge {
+public:
+  RomBasedCartridge(const CartridgeType cartridge_type,
+                    const std::shared_ptr<array<uint8_t, MAX_ROM_SIZE>> &rom,
+                    const std::shared_ptr<array<uint8_t, MAX_RAM_SIZE>> &ram,
+                    const string &rom_path)
+      : Cartridge(cartridge_type, rom_path), rom_(rom), ram_(ram){};
+  ~RomBasedCartridge(){};
+
+  virtual uint8_t get(const u_int16_t &address) const override {
+    return rom_[address];
+  };
+  virtual void set(const uint16_t &address, const uint8_t value) override {
+    return;
+  };
+  virtual void save() override{};
+
+protected:
+  std::shared_ptr<array<uint8_t, MAX_ROM_SIZE>> rom_;
+  std::shared_ptr<array<uint8_t, MAX_RAM_SIZE>> ram_;
 };
 
 }; // namespace cartridge
