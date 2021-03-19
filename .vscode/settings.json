@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "app.json.mustache": "json",
         "*.cppm": "cpp",
         "iostream": "cpp",
         "array": "cpp",
@@ -68,7 +69,8 @@
         "__functional_03": "cpp",
         "memory_resource": "cpp",
         "__cxx_version": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "unordered_set": "cpp"
     },
     "editor.formatOnSave": true,
     "C_Cpp.clang_format_path": "/usr/local/Cellar/clang-format/11.0.0/bin/clang-format"

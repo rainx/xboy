@@ -74,7 +74,7 @@ enum CartridgeType {
   HuC1WithRamAndBattery = 0xff,
 };
 
-class Cartridge : Memory {
+class Cartridge : public Memory {
 public:
   Cartridge(const CartridgeType cartridge_type, const string &rom_path)
       : cartridge_type_(cartridge_type), rom_path_(rom_path){};
@@ -96,7 +96,7 @@ protected:
  * @tparam MAX_RAM_SIZE max ram size in bytes
  */
 template <uint32_t MAX_ROM_SIZE = 0, uint32_t MAX_RAM_SIZE = 0>
-class RomBasedCartridge : Cartridge {
+class RomBasedCartridge : public Cartridge {
 public:
   RomBasedCartridge(const CartridgeType cartridge_type,
                     const std::shared_ptr<array<uint8_t, MAX_ROM_SIZE>> &rom,
@@ -106,7 +106,7 @@ public:
   ~RomBasedCartridge(){};
 
   virtual uint8_t get(const u_int16_t &address) const override {
-    return rom_[address];
+    return (*rom_)[address];
   };
   virtual void set(const uint16_t &address, const uint8_t value) override {
     return;
