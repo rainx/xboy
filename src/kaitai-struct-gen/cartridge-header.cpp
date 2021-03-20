@@ -1,7 +1,7 @@
 // This is a generated file! Please edit source .ksy file and use kaitai-struct-compiler to rebuild
 
 #include "cartridge-header.h"
-namespace kaitai-struct-gen {
+namespace gen {
 
     cartridge_header_t::cartridge_header_t(kaitai::kstream* p__io, kaitai::kstruct* p__parent, cartridge_header_t* p__root) : kaitai::kstruct(p__io) {
         m__parent = p__parent;

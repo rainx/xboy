@@ -9,7 +9,7 @@
 #if KAITAI_STRUCT_VERSION < 9000L
 #error "Incompatible Kaitai Struct C++/STL API: version 0.9 or later is required"
 #endif
-namespace kaitai-struct-gen {
+namespace gen {
 
     class cartridge_header_t : public kaitai::kstruct {
 
