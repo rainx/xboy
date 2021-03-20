@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.ksy": "yaml",
         "app.json.mustache": "json",
         "*.cppm": "cpp",
         "iostream": "cpp",
@@ -73,5 +74,8 @@
         "unordered_set": "cpp"
     },
     "editor.formatOnSave": true,
-    "C_Cpp.clang_format_path": "/usr/local/Cellar/clang-format/11.0.0/bin/clang-format"
+    "C_Cpp.clang_format_path": "/usr/local/Cellar/clang-format/11.0.0/bin/clang-format",
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/kaitai-io/ksy_schema/master/ksy_schema.json": "*.ksy"
+    },
 }
