@@ -20,6 +20,8 @@
 #include "mmu/memory.hpp"
 
 using std::array;
+using std::ios;
+using std::ofstream;
 using std::string;
 
 namespace mmu {
@@ -74,6 +76,11 @@ enum CartridgeType {
   HuC1WithRamAndBattery = 0xff,
 };
 
+enum BankMode {
+  Rom = 0,
+  Ram = 1,
+};
+
 class Cartridge : public Memory {
 public:
   Cartridge(const CartridgeType cartridge_type, const string &rom_path)
@@ -111,7 +118,13 @@ public:
   virtual void set(const uint16_t &address, const uint8_t value) override {
     return;
   };
-  virtual void save() override{};
+  virtual void save() override {
+    {
+      ofstream<uint8_t> ram_stream(rom_path_ + ".sav", ofstream::binary);
+      ram_stream.write(ram_->data(), ram_->size());
+      ram_stream.close();
+    };
+  }
 
 protected:
   std::shared_ptr<array<uint8_t, MAX_ROM_SIZE>> rom_;
