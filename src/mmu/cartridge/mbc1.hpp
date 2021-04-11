@@ -9,22 +9,15 @@ namespace cartridge {
 const uint32_t max_mbc1_rom_size = 128 * 1024 * 16; //~ 2M
 const uint32_t max_mbc1_ram_size = 8 * 1024 * 4;    // 16k * 4
 
-class Mbc1 : RomBasedCartridge<max_mbc1_rom_size, max_mbc1_ram_size> {
+class Mbc1 : public RomBasedCartridge<max_mbc1_rom_size, max_mbc1_ram_size> {
 public:
   Mbc1(const CartridgeType cartridge_type,
        const std::shared_ptr<array<uint8_t, max_mbc1_rom_size>> &rom,
-       const BankMode bank_mode, const uint8_t bank, const string &rom_path)
+       const BankMode bank_mode, const string &rom_path)
       : RomBasedCartridge<max_mbc1_rom_size, max_mbc1_ram_size>(
             cartridge_type, rom,
             std::make_shared<array<uint8_t, max_mbc1_ram_size>>(), rom_path),
-        bank_mode_(bank_mode), bank_(bank) {
-    if (cartridge_type_ == Mbc1WithRam ||
-        cartridge_type_ == Mbc1WithRamAndBattery) {
-      ram_enabled_ = true;
-    } else { // cartridge_type_ == MBC1
-      ram_enabled_ = false;
-    }
-  };
+        bank_mode_(bank_mode), bank_(0x01), ram_enabled_(false){};
 
   virtual uint8_t get(const uint16_t &address) const override {
     if (address >= 0 && address <= 0x3fff) {
@@ -95,7 +88,7 @@ private:
     }
   };
 
-  bool ram_enabled_;
+  bool ram_enabled_ = false;
 };
 
 }; // namespace cartridge

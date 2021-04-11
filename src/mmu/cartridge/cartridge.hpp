@@ -14,6 +14,7 @@
 //   - http://gbdev.gg8.se/wiki/articles/Memory_Bank_Controllers
 
 #include <array>
+#include <fstream>
 #include <memory>
 #include <string>
 
@@ -119,11 +120,10 @@ public:
     return;
   };
   virtual void save() override {
-    {
-      ofstream<uint8_t> ram_stream(rom_path_ + ".sav", ofstream::binary);
-      ram_stream.write(ram_->data(), ram_->size());
-      ram_stream.close();
-    };
+    ofstream ram_sav_stream;
+    ram_sav_stream.open(rom_path_ + ".sav", ofstream::binary | ofstream::out);
+    ram_sav_stream.write((char *)(*ram_).data(), (*ram_).size());
+    ram_sav_stream.close();
   }
 
 protected:

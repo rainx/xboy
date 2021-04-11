@@ -23,18 +23,22 @@ mmu::cartridge::Cartridge::powerUp(const string &rom_path) {
   kaitai::kstream ks_rom(&rom_ifstream);
   gen::cartridge_header_t cartrigde_header = gen::cartridge_header_t(&ks_rom);
 
-  uint8_t cartridge_type = cartrigde_header.cartridge_type();
+  CartridgeType cartridge_type =
+      static_cast<CartridgeType>(cartrigde_header.cartridge_type());
   rom_ifstream.seekg(0);
   uint8_t one_byte_to_read;
   uint32_t index_of_reader = 0;
   if (cartridge_type == RomOnly) {
     const auto rom = std::make_shared<array<uint8_t, rom_only_cartrige_size>>();
     // max size is 32 * 1024
-    if (rom_ifstream >> one_byte_to_read &&
-        index_of_reader < rom_only_cartrige_size) {
-      (*rom)[index_of_reader++] = one_byte_to_read;
-    }
+    rom_ifstream.read((char *)rom->data(), rom->size());
     return std::make_shared<RomOnlyCartridge>(rom, rom_path);
+  } else if (cartridge_type == MBC1 || cartridge_type == Mbc1WithRam ||
+             cartridge_type == Mbc1WithRamAndBattery) {
+    const auto rom = std::make_shared<array<uint8_t, max_mbc1_rom_size>>();
+    rom_ifstream.read((char *)rom->data(), rom->size());
+    return std::make_shared<Mbc1>(cartridge_type, rom,
+                                  cartridge_type == MBC1 ? Rom : Ram, rom_path);
   } else {
     std::stringstream unsupportted_type;
     unsupportted_type << "Not yet support the type " << std::hex
