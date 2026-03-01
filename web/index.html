@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoy - Game Boy Emulator</title>
+    <link rel="stylesheet" href="css/xboy.css">
+</head>
+<body>
+    <div class="emulator-container">
+        <header>
+            <h1>XBoy</h1>
+            <div class="controls">
+                <input type="file" id="rom-file" accept=".gb,.gbc" style="display: none;">
+                <button id="load-rom" class="btn">Load ROM</button>
+                <button id="start-emulation" class="btn" disabled>Start</button>
+                <button id="pause-emulation" class="btn" disabled>Pause</button>
+                <button id="reset-emulation" class="btn" disabled>Reset</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="game-section">
+                <div class="drop-zone" id="drop-zone">
+                    <div class="drop-text">
+                        <p>Drag & Drop ROM file here</p>
+                        <p>or</p>
+                        <button id="browse-rom" class="btn btn-secondary">Browse</button>
+                    </div>
+                </div>
+
+                <div class="game-display" id="game-display" style="display: none;">
+                    <canvas id="game-canvas" width="160" height="144"></canvas>
+                    <div class="game-info">
+                        <span id="fps-counter">60 FPS</span>
+                        <span id="rom-name">No ROM loaded</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="save-states">
+                    <h3>Save States</h3>
+                    <div class="save-state-slots">
+                        <button class="save-slot" data-slot="1">1</button>
+                        <button class="save-slot" data-slot="2">2</button>
+                        <button class="save-slot" data-slot="3">3</button>
+                        <button class="save-slot" data-slot="4">4</button>
+                    </div>
+                    <div class="save-state-actions">
+                        <button id="save-state" class="btn btn-secondary">Save</button>
+                        <button id="load-state" class="btn btn-secondary">Load</button>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <h3>Controls</h3>
+                    <div class="control-grid">
+                        <div class="control-row">
+                            <div class="key-control">
+                                <span class="key">↑</span>
+                                <span>Up</span>
+                            </div>
+                            <div class="key-control">
+                                <span class="key">Z</span>
+                                <span>A</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="key-control">
+                                <span class="key">←</span>
+                                <span>Left</span>
+                            </div>
+                            <div class="key-control">
+                                <span class="key">X</span>
+                                <span>B</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="key-control">
+                                <span class="key">↓</span>
+                                <span>Down</span>
+                            </div>
+                            <div class="key-control">
+                                <span class="key">Enter</span>
+                                <span>Start</span>
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="key-control">
+                                <span class="key">→</span>
+                                <span>Right</span>
+                            </div>
+                            <div class="key-control">
+                                <span class="key">Backspace</span>
+                                <span>Select</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings">
+                    <h3>Settings</h3>
+                    <div class="setting-row">
+                        <label for="scale">Scale:</label>
+                        <select id="scale">
+                            <option value="1">1x</option>
+                            <option value="2">2x</option>
+                            <option value="3" selected>3x</option>
+                            <option value="4">4x</option>
+                            <option value="5">5x</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label for="sound-enabled">
+                            <input type="checkbox" id="sound-enabled" checked>
+                            Sound Enabled
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>WebAssembly Game Boy Emulator</p>
+        </footer>
+    </div>
+
+    <!-- Virtual controls for mobile -->
+    <div class="virtual-controls" id="virtual-controls" style="display: none;">
+        <div class="d-pad">
+            <button class="d-pad-btn" id="virtual-up">↑</button>
+            <button class="d-pad-btn" id="virtual-left">←</button>
+            <button class="d-pad-btn" id="virtual-down">↓</button>
+            <button class="d-pad-btn" id="virtual-right">→</button>
+        </div>
+        <div class="action-buttons">
+            <button class="action-btn" id="virtual-a">A</button>
+            <button class="action-btn" id="virtual-b">B</button>
+            <button class="action-btn" id="virtual-start">START</button>
+            <button class="action-btn" id="virtual-select">SELECT</button>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading WebAssembly...</p>
+        </div>
+    </div>
+
+    <script src="js/xboy.js"></script>
+    <script src="js/rom-loader.js"></script>
+    <script src="js/save-states.js"></script>
+    <script src="js/controls.js"></script>
+</body>
+</html>
