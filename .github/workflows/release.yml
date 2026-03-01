@@ -49,7 +49,7 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
       - name: Build
-        run: cmake --build build --config Release --target xboy --parallel
+        run: cmake --build build --config Release --parallel
 
       - name: Package (tar.gz)
         if: matrix.archive == 'tar'
