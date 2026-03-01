@@ -584,6 +584,31 @@ footer {
     color: var(--text-tertiary);
 }
 
+.footer-links {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+}
+
+.footer-sep {
+    width: 3px;
+    height: 3px;
+    background: var(--text-tertiary);
+    border-radius: 50%;
+}
+
 /* ── Notification (injected by JS) ────────── */
 /* Overrides for inline styles from rom-loader.js / save-states.js are
    not needed — those modules set styles directly.  We provide a base
