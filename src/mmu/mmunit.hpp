@@ -24,6 +24,9 @@ public:
   virtual uint8_t get(const uint16_t &address) const override;
   virtual void set(const uint16_t &address, const uint8_t value) override;
 
+  // Direct I/O write — bypasses special register handling (e.g. DIV reset)
+  void setIO(uint8_t offset, uint8_t value) { io_[offset] = value; }
+
   // Serial port output capture (for Blargg tests)
   std::string getSerialOutput() const { return serial_output_; }
 

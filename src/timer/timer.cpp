@@ -11,7 +11,7 @@ void Timer::step(uint8_t cycles) {
   while (div_counter_ >= 256) {
     div_counter_ -= 256;
     uint8_t div = mmu_->get(0xFF04);
-    mmu_->set(0xFF04, div + 1);
+    mmu_->setIO(0x04, div + 1);
   }
 
   // TIMA only runs if timer is enabled (TAC bit 2)
