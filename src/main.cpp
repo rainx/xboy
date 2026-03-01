@@ -1,6 +1,8 @@
+#include "apu/apu.hpp"
 #include "cpu/cpu.hpp"
 #include "input/joypad.hpp"
 #include "mmu/mmunit.hpp"
+#include "platform/sdl_audio.hpp"
 #include "platform/sdl_display.hpp"
 #include "platform/sdl_input.hpp"
 #include "ppu/ppu.hpp"
@@ -27,10 +29,18 @@ int main(int argc, char **argv) {
   cpu::Cpu cpu_core(mmu);
   timer::Timer tmr(mmu);
   ppu::Ppu gpu(mmu);
+  apu::Apu audio(mmu);
   auto joypad = std::make_shared<input::Joypad>(mmu);
 
   platform::SdlDisplay display(3); // 3x scale → 480x432 window
+  platform::SdlAudio sdl_audio;
   platform::SdlInput sdl_input(joypad);
+
+  // Wire APU sample output to SDL audio queue
+  audio.setSampleCallback(
+      [&sdl_audio](float left, float right) {
+        sdl_audio.pushSample(left, right);
+      });
 
   bool running = true;
 
@@ -41,6 +51,7 @@ int main(int argc, char **argv) {
       uint8_t cycles = cpu_core.step();
       tmr.step(cycles);
       gpu.step(cycles);
+      audio.step(cycles);
       frame_cycles += cycles;
 
       uint8_t int_cycles = cpu_core.handleInterrupts();
@@ -58,6 +69,12 @@ int main(int argc, char **argv) {
 
     // Poll input and handle quit
     running = sdl_input.poll();
+
+    // Audio-based throttling: wait if audio queue is too far ahead
+    // This naturally syncs A/V — audio queue depth controls frame pacing
+    while (sdl_audio.getQueuedBytes() > platform::SdlAudio::SAMPLE_RATE * 4 * 2 / 15) {
+      SDL_Delay(1);
+    }
 
     // Frame timing
     display.syncFrame();

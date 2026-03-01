@@ -18,6 +18,7 @@ file(GLOB CORE_SOURCES
     src/timer/*.cpp
     src/ppu/*.cpp
     src/input/*.cpp
+    src/apu/*.cpp
     src/kaitai-struct-gen/*.cpp
 )
 
