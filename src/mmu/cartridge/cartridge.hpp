@@ -17,6 +17,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "mmu/memory.hpp"
 
@@ -90,6 +91,8 @@ public:
   virtual ~Cartridge(){};
   virtual void save() = 0;
   virtual CartridgeType getCartridgeType() { return cartridge_type_; };
+  virtual void serialize(std::vector<uint8_t> &buf) const = 0;
+  virtual void deserialize(const uint8_t *data, size_t &pos) = 0;
   // Factory to return Correct Cartridge from rom
   static std::shared_ptr<Cartridge> powerUp(const string &rom_path);
 

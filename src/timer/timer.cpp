@@ -1,5 +1,6 @@
 #include "timer/timer.hpp"
 #include "cpu/interrupts.hpp"
+#include "state/serializable.hpp"
 
 namespace timer {
 
@@ -46,6 +47,16 @@ uint16_t Timer::getTimaThreshold(uint8_t tac) {
   case 3: return 256;  // 16384 Hz
   default: return 1024;
   }
+}
+
+void Timer::serialize(std::vector<uint8_t> &buf) const {
+  state::write_u16(buf, div_counter_);
+  state::write_u16(buf, tima_counter_);
+}
+
+void Timer::deserialize(const uint8_t *data, size_t &pos) {
+  div_counter_ = state::read_u16(data, pos);
+  tima_counter_ = state::read_u16(data, pos);
 }
 
 } // namespace timer

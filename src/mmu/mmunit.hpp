@@ -6,6 +6,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 using mmu::cartridge::Cartridge;
 using std::string;
@@ -29,6 +30,13 @@ public:
 
   // Serial port output capture (for Blargg tests)
   std::string getSerialOutput() const { return serial_output_; }
+
+  // Save state serialization
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
+
+  // Cartridge access for save state
+  std::shared_ptr<Cartridge> getCartridge() const { return cartridge_; }
 
 private:
   std::shared_ptr<Cartridge> cartridge_;

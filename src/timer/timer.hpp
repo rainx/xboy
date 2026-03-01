@@ -3,6 +3,7 @@
 #include "mmu/mmunit.hpp"
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace timer {
 
@@ -25,6 +26,10 @@ public:
 
   // Advance timer by the given number of T-cycles
   void step(uint8_t cycles);
+
+  // Save state serialization
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
 
 private:
   std::shared_ptr<mmu::Mmunit> mmu_;

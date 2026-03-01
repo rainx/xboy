@@ -16,6 +16,18 @@ bool SdlInput::poll() {
       if (event.key.keysym.sym == SDLK_ESCAPE) {
         return false;
       }
+      if (event.key.keysym.sym == SDLK_F5) {
+        save_requested_ = true;
+        break;
+      }
+      if (event.key.keysym.sym == SDLK_F7) {
+        load_requested_ = true;
+        break;
+      }
+      if (event.key.keysym.sym == SDLK_F12) {
+        debug_toggle_ = true;
+        break;
+      }
       handleKey(event.key.keysym.sym, true);
       break;
 

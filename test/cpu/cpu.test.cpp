@@ -27,6 +27,8 @@ public:
 
   void set(const uint16_t &address, const uint8_t value) override {}
   void save() override {}
+  void serialize(std::vector<uint8_t> &) const override {}
+  void deserialize(const uint8_t *, size_t &) override {}
 
 private:
   std::shared_ptr<std::array<uint8_t, 0x8000>> rom_;

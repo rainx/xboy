@@ -1,4 +1,5 @@
 #include "apu/apu.hpp"
+#include "state/serializable.hpp"
 
 namespace apu {
 
@@ -190,6 +191,36 @@ void Apu::mixAndOutput() {
   mmu_->set(reg::NR52, nr52);
 
   sample_callback_(left, right);
+}
+
+void Apu::serialize(std::vector<uint8_t> &buf) const {
+  state::write_u16(buf, frame_seq_counter_);
+  state::write_u8(buf, frame_seq_step_);
+  state::write_u32(buf, sample_counter_);
+  state::write_u8(buf, prev_nr14_);
+  state::write_u8(buf, prev_nr24_);
+  state::write_u8(buf, prev_nr34_);
+  state::write_u8(buf, prev_nr44_);
+  state::write_bool(buf, powered_);
+  ch1_.serialize(buf);
+  ch2_.serialize(buf);
+  ch3_.serialize(buf);
+  ch4_.serialize(buf);
+}
+
+void Apu::deserialize(const uint8_t *data, size_t &pos) {
+  frame_seq_counter_ = state::read_u16(data, pos);
+  frame_seq_step_ = state::read_u8(data, pos);
+  sample_counter_ = state::read_u32(data, pos);
+  prev_nr14_ = state::read_u8(data, pos);
+  prev_nr24_ = state::read_u8(data, pos);
+  prev_nr34_ = state::read_u8(data, pos);
+  prev_nr44_ = state::read_u8(data, pos);
+  powered_ = state::read_bool(data, pos);
+  ch1_.deserialize(data, pos);
+  ch2_.deserialize(data, pos);
+  ch3_.deserialize(data, pos);
+  ch4_.deserialize(data, pos);
 }
 
 } // namespace apu

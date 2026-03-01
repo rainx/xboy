@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./cartridge.hpp"
+#include "state/serializable.hpp"
 #include <memory>
 
 namespace mmu {
@@ -74,6 +75,20 @@ public:
         (*ram_)[mapped] = value;
       }
     }
+  }
+
+  void serialize(std::vector<uint8_t> &buf) const override {
+    state::write_u16(buf, rom_bank_);
+    state::write_u8(buf, ram_bank_);
+    state::write_bool(buf, ram_enabled_);
+    state::write_bytes(buf, ram_->data(), ram_->size());
+  }
+
+  void deserialize(const uint8_t *data, size_t &pos) override {
+    rom_bank_ = state::read_u16(data, pos);
+    ram_bank_ = state::read_u8(data, pos);
+    ram_enabled_ = state::read_bool(data, pos);
+    state::read_bytes(data, pos, ram_->data(), ram_->size());
   }
 
 private:

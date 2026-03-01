@@ -1,4 +1,5 @@
 #include "apu/channel4.hpp"
+#include "state/serializable.hpp"
 
 namespace apu {
 
@@ -114,6 +115,40 @@ float Channel4::getOutput() const {
   // LFSR output: bit 0 inverted (0 = high, 1 = low)
   uint8_t sample = (~lfsr_ & 0x01) * volume_;
   return (static_cast<float>(sample) / 7.5f) - 1.0f;
+}
+
+void Channel4::serialize(std::vector<uint8_t> &buf) const {
+  state::write_bool(buf, enabled_);
+  state::write_bool(buf, dac_on_);
+  state::write_u16(buf, lfsr_);
+  state::write_bool(buf, width_mode_);
+  state::write_u8(buf, clock_shift_);
+  state::write_u8(buf, divisor_code_);
+  state::write_u32(buf, static_cast<uint32_t>(freq_timer_));
+  state::write_u16(buf, length_counter_);
+  state::write_bool(buf, length_enable_);
+  state::write_u8(buf, volume_);
+  state::write_u8(buf, envelope_init_);
+  state::write_bool(buf, envelope_add_);
+  state::write_u8(buf, envelope_period_);
+  state::write_u8(buf, envelope_timer_);
+}
+
+void Channel4::deserialize(const uint8_t *data, size_t &pos) {
+  enabled_ = state::read_bool(data, pos);
+  dac_on_ = state::read_bool(data, pos);
+  lfsr_ = state::read_u16(data, pos);
+  width_mode_ = state::read_bool(data, pos);
+  clock_shift_ = state::read_u8(data, pos);
+  divisor_code_ = state::read_u8(data, pos);
+  freq_timer_ = static_cast<int>(state::read_u32(data, pos));
+  length_counter_ = state::read_u16(data, pos);
+  length_enable_ = state::read_bool(data, pos);
+  volume_ = state::read_u8(data, pos);
+  envelope_init_ = state::read_u8(data, pos);
+  envelope_add_ = state::read_bool(data, pos);
+  envelope_period_ = state::read_u8(data, pos);
+  envelope_timer_ = state::read_u8(data, pos);
 }
 
 } // namespace apu

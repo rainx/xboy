@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./cartridge.hpp"
+#include "state/serializable.hpp"
 #include <chrono>
 #include <cstdint>
 #include <memory>
@@ -108,6 +109,60 @@ public:
     if (hasRtc()) {
       saveRtc();
     }
+  }
+
+  void serialize(std::vector<uint8_t> &buf) const override {
+    state::write_u8(buf, rom_bank_);
+    state::write_u8(buf, ram_rtc_select_);
+    state::write_bool(buf, ram_enabled_);
+    state::write_bool(buf, latch_ready_);
+    // RTC registers
+    state::write_u8(buf, rtc_.seconds);
+    state::write_u8(buf, rtc_.minutes);
+    state::write_u8(buf, rtc_.hours);
+    state::write_u8(buf, rtc_.days_low);
+    state::write_u8(buf, rtc_.days_high);
+    state::write_u8(buf, latched_rtc_.seconds);
+    state::write_u8(buf, latched_rtc_.minutes);
+    state::write_u8(buf, latched_rtc_.hours);
+    state::write_u8(buf, latched_rtc_.days_low);
+    state::write_u8(buf, latched_rtc_.days_high);
+    // RTC time as unix epoch
+    state::write_i64(buf, computeCurrentSeconds());
+    auto unix_ts = std::chrono::duration_cast<std::chrono::seconds>(
+                       std::chrono::system_clock::now().time_since_epoch())
+                       .count();
+    state::write_i64(buf, unix_ts);
+    // RAM
+    state::write_bytes(buf, ram_->data(), ram_->size());
+  }
+
+  void deserialize(const uint8_t *data, size_t &pos) override {
+    rom_bank_ = state::read_u8(data, pos);
+    ram_rtc_select_ = state::read_u8(data, pos);
+    ram_enabled_ = state::read_bool(data, pos);
+    latch_ready_ = state::read_bool(data, pos);
+    rtc_.seconds = state::read_u8(data, pos);
+    rtc_.minutes = state::read_u8(data, pos);
+    rtc_.hours = state::read_u8(data, pos);
+    rtc_.days_low = state::read_u8(data, pos);
+    rtc_.days_high = state::read_u8(data, pos);
+    latched_rtc_.seconds = state::read_u8(data, pos);
+    latched_rtc_.minutes = state::read_u8(data, pos);
+    latched_rtc_.hours = state::read_u8(data, pos);
+    latched_rtc_.days_low = state::read_u8(data, pos);
+    latched_rtc_.days_high = state::read_u8(data, pos);
+    int64_t saved_base = state::read_i64(data, pos);
+    int64_t saved_unix_ts = state::read_i64(data, pos);
+    // Reconstruct RTC timing
+    auto now_unix = std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::system_clock::now().time_since_epoch())
+                        .count();
+    int64_t elapsed = now_unix - saved_unix_ts;
+    rtc_base_seconds_ = saved_base + (elapsed > 0 ? elapsed : 0);
+    rtc_start_time_ = std::chrono::system_clock::now();
+    // RAM
+    state::read_bytes(data, pos, ram_->data(), ram_->size());
   }
 
   // Exposed for testing

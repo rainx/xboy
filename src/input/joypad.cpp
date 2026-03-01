@@ -1,5 +1,6 @@
 #include "input/joypad.hpp"
 #include "cpu/interrupts.hpp"
+#include "state/serializable.hpp"
 
 namespace input {
 
@@ -50,6 +51,14 @@ void Joypad::update() {
   }
 
   mmu_->set(0xFF00, result);
+}
+
+void Joypad::serialize(std::vector<uint8_t> &buf) const {
+  state::write_u8(buf, button_state_);
+}
+
+void Joypad::deserialize(const uint8_t *data, size_t &pos) {
+  button_state_ = state::read_u8(data, pos);
 }
 
 } // namespace input

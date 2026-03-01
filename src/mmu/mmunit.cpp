@@ -3,6 +3,7 @@
 
 #include "cartridge/cartridge.hpp"
 #include "mmu/mmunit.hpp"
+#include "state/serializable.hpp"
 
 using namespace mmu;
 using mmu::cartridge::Cartridge;
@@ -122,4 +123,22 @@ void mmu::Mmunit::set(const uint16_t &address, const uint8_t value) {
 std::shared_ptr<Mmunit> mmu::Mmunit::powerUp(const string &rom_path) {
   std::shared_ptr<Cartridge> cartridge = Cartridge::powerUp(rom_path);
   return std::make_shared<Mmunit>(cartridge);
+}
+
+void mmu::Mmunit::serialize(std::vector<uint8_t> &buf) const {
+  state::write_bytes(buf, vram_.data(), vram_.size());
+  state::write_bytes(buf, wram_.data(), wram_.size());
+  state::write_bytes(buf, oam_.data(), oam_.size());
+  state::write_bytes(buf, io_.data(), io_.size());
+  state::write_bytes(buf, hram_.data(), hram_.size());
+  state::write_u8(buf, ie_);
+}
+
+void mmu::Mmunit::deserialize(const uint8_t *data, size_t &pos) {
+  state::read_bytes(data, pos, vram_.data(), vram_.size());
+  state::read_bytes(data, pos, wram_.data(), wram_.size());
+  state::read_bytes(data, pos, oam_.data(), oam_.size());
+  state::read_bytes(data, pos, io_.data(), io_.size());
+  state::read_bytes(data, pos, hram_.data(), hram_.size());
+  ie_ = state::read_u8(data, pos);
 }

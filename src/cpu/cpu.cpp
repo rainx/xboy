@@ -1,4 +1,5 @@
 #include "cpu/cpu.hpp"
+#include "state/serializable.hpp"
 
 namespace cpu {
 
@@ -263,6 +264,42 @@ void Cpu::cb_bit(uint8_t bit, uint8_t val) {
   regs_.setFlagN(false);
   regs_.setFlagH(true);
   // C not affected
+}
+
+// --- Save state serialization ---
+
+void Cpu::serialize(std::vector<uint8_t> &buf) const {
+  state::write_u8(buf, regs_.a);
+  state::write_u8(buf, regs_.f);
+  state::write_u8(buf, regs_.b);
+  state::write_u8(buf, regs_.c);
+  state::write_u8(buf, regs_.d);
+  state::write_u8(buf, regs_.e);
+  state::write_u8(buf, regs_.h);
+  state::write_u8(buf, regs_.l);
+  state::write_u16(buf, regs_.sp);
+  state::write_u16(buf, regs_.pc);
+  state::write_bool(buf, ime_);
+  state::write_bool(buf, ei_pending_);
+  state::write_bool(buf, halted_);
+  state::write_bool(buf, stopped_);
+}
+
+void Cpu::deserialize(const uint8_t *data, size_t &pos) {
+  regs_.a = state::read_u8(data, pos);
+  regs_.f = state::read_u8(data, pos);
+  regs_.b = state::read_u8(data, pos);
+  regs_.c = state::read_u8(data, pos);
+  regs_.d = state::read_u8(data, pos);
+  regs_.e = state::read_u8(data, pos);
+  regs_.h = state::read_u8(data, pos);
+  regs_.l = state::read_u8(data, pos);
+  regs_.sp = state::read_u16(data, pos);
+  regs_.pc = state::read_u16(data, pos);
+  ime_ = state::read_bool(data, pos);
+  ei_pending_ = state::read_bool(data, pos);
+  halted_ = state::read_bool(data, pos);
+  stopped_ = state::read_bool(data, pos);
 }
 
 } // namespace cpu

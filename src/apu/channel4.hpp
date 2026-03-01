@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 namespace apu {
 
@@ -30,6 +31,9 @@ public:
 
   bool isEnabled() const { return enabled_; }
   bool isDacOn() const { return dac_on_; }
+
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
 
 private:
   // Divisor code → base divisor value

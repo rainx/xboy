@@ -14,6 +14,9 @@ public:
       const string &rom_path)
       : RomBasedCartridge<rom_only_cartrige_size, 0>(
             RomOnly, rom, std::make_shared<array<uint8_t, 0>>(), rom_path){};
+
+  void serialize(std::vector<uint8_t> &) const override {}
+  void deserialize(const uint8_t *, size_t &) override {}
 };
 
 } // namespace cartridge

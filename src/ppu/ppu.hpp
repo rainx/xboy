@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace ppu {
 
@@ -72,6 +73,10 @@ public:
   const std::array<Color, SCREEN_WIDTH * SCREEN_HEIGHT> &getFrameBuffer() const {
     return framebuffer_;
   }
+
+  // Save state serialization
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
 
 private:
   std::shared_ptr<mmu::Mmunit> mmu_;

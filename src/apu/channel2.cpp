@@ -1,4 +1,5 @@
 #include "apu/channel2.hpp"
+#include "state/serializable.hpp"
 
 namespace apu {
 
@@ -101,6 +102,38 @@ float Channel2::getOutput() const {
   // DAC converts 0-15 to -1.0..+1.0
   uint8_t sample = DUTY_TABLE[duty_pattern_][duty_index_] * volume_;
   return (static_cast<float>(sample) / 7.5f) - 1.0f;
+}
+
+void Channel2::serialize(std::vector<uint8_t> &buf) const {
+  state::write_bool(buf, enabled_);
+  state::write_bool(buf, dac_on_);
+  state::write_u16(buf, frequency_);
+  state::write_u32(buf, static_cast<uint32_t>(freq_timer_));
+  state::write_u8(buf, duty_index_);
+  state::write_u8(buf, duty_pattern_);
+  state::write_u16(buf, length_counter_);
+  state::write_bool(buf, length_enable_);
+  state::write_u8(buf, volume_);
+  state::write_u8(buf, envelope_init_);
+  state::write_bool(buf, envelope_add_);
+  state::write_u8(buf, envelope_period_);
+  state::write_u8(buf, envelope_timer_);
+}
+
+void Channel2::deserialize(const uint8_t *data, size_t &pos) {
+  enabled_ = state::read_bool(data, pos);
+  dac_on_ = state::read_bool(data, pos);
+  frequency_ = state::read_u16(data, pos);
+  freq_timer_ = static_cast<int>(state::read_u32(data, pos));
+  duty_index_ = state::read_u8(data, pos);
+  duty_pattern_ = state::read_u8(data, pos);
+  length_counter_ = state::read_u16(data, pos);
+  length_enable_ = state::read_bool(data, pos);
+  volume_ = state::read_u8(data, pos);
+  envelope_init_ = state::read_u8(data, pos);
+  envelope_add_ = state::read_bool(data, pos);
+  envelope_period_ = state::read_u8(data, pos);
+  envelope_timer_ = state::read_u8(data, pos);
 }
 
 } // namespace apu

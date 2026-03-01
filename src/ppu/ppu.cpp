@@ -1,5 +1,6 @@
 #include "ppu/ppu.hpp"
 #include "cpu/interrupts.hpp"
+#include "state/serializable.hpp"
 
 namespace ppu {
 
@@ -326,6 +327,26 @@ uint8_t Ppu::getTilePixel(uint16_t tile_data_base, uint8_t tile_id,
 Color Ppu::decodeColor(uint8_t palette, uint8_t color_idx) const {
   uint8_t mapped = (palette >> (color_idx * 2)) & 0x03;
   return DMG_PALETTE[mapped];
+}
+
+// --- Save state serialization ---
+
+void Ppu::serialize(std::vector<uint8_t> &buf) const {
+  state::write_u16(buf, cycle_counter_);
+  state::write_u8(buf, static_cast<uint8_t>(mode_));
+  state::write_bool(buf, frame_ready_);
+  state::write_u8(buf, window_line_);
+  state::write_bool(buf, window_was_active_);
+  // bg_color_indices_ is per-scanline scratch, regenerated
+  // framebuffer_ is regenerated on next scanline
+}
+
+void Ppu::deserialize(const uint8_t *data, size_t &pos) {
+  cycle_counter_ = state::read_u16(data, pos);
+  mode_ = static_cast<LcdMode>(state::read_u8(data, pos));
+  frame_ready_ = state::read_bool(data, pos);
+  window_line_ = state::read_u8(data, pos);
+  window_was_active_ = state::read_bool(data, pos);
 }
 
 } // namespace ppu

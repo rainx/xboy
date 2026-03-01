@@ -3,6 +3,7 @@
 #include "mmu/mmunit.hpp"
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace input {
 
@@ -38,6 +39,10 @@ public:
   // Called by MMU/main loop to update the JOYP register based on
   // the select bits written by the game
   void update();
+
+  // Save state serialization
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
 
 private:
   std::shared_ptr<mmu::Mmunit> mmu_;

@@ -19,6 +19,9 @@ file(GLOB CORE_SOURCES
     src/ppu/*.cpp
     src/input/*.cpp
     src/apu/*.cpp
+    src/test_runner/*.cpp
+    src/state/*.cpp
+    src/debugger/*.cpp
     src/kaitai-struct-gen/*.cpp
 )
 

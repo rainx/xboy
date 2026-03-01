@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace cpu {
 
@@ -27,6 +28,10 @@ public:
   // Handle interrupts — called after step() in the main loop
   // Returns cycles consumed by interrupt dispatch (0 if no interrupt)
   uint8_t handleInterrupts();
+
+  // Save state serialization
+  void serialize(std::vector<uint8_t> &buf) const;
+  void deserialize(const uint8_t *data, size_t &pos);
 
 private:
   // Fetch byte at PC and advance PC
