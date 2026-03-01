@@ -21,6 +21,7 @@
 #include "mmu/memory.hpp"
 
 using std::array;
+using std::ifstream;
 using std::ios;
 using std::ofstream;
 using std::string;
@@ -50,7 +51,7 @@ enum CartridgeType {
   RomOnly = 0x00,
   MBC1 = 0x01,
   Mbc1WithRam = 0x02,
-  Mbc1WithRamAndBattery = 0x01,
+  Mbc1WithRamAndBattery = 0x03,
   Mbc2 = 0x05,
   Mbc2WithBattery = 0x06,
   RomAndRam = 0x08,
@@ -127,6 +128,13 @@ public:
   }
 
 protected:
+  void loadRam() {
+    ifstream sav_stream(rom_path_ + ".sav", ifstream::binary);
+    if (sav_stream.good()) {
+      sav_stream.read((char *)(*ram_).data(), (*ram_).size());
+    }
+  }
+
   std::shared_ptr<array<uint8_t, MAX_ROM_SIZE>> rom_;
   std::shared_ptr<array<uint8_t, MAX_RAM_SIZE>> ram_;
 };

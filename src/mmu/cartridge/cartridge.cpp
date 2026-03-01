@@ -7,6 +7,8 @@
 
 #include "./cartridge.hpp"
 #include "./mbc1.hpp"
+#include "./mbc3.hpp"
+#include "./mbc5.hpp"
 #include "./rom-only-cartridge.hpp"
 #include "kaitai-struct-gen/cartridge-header.h"
 
@@ -39,6 +41,21 @@ mmu::cartridge::Cartridge::powerUp(const string &rom_path) {
     rom_ifstream.read((char *)rom->data(), rom->size());
     return std::make_shared<Mbc1>(cartridge_type, rom,
                                   cartridge_type == MBC1 ? Rom : Ram, rom_path);
+  } else if (cartridge_type == Mbc3 || cartridge_type == Mbc3WithRam ||
+             cartridge_type == Mbc3WithRamAndBattery ||
+             cartridge_type == Mbc3WithTimerAndBattery ||
+             cartridge_type == Mbc3WithTimerAndRamAndBattery) {
+    const auto rom = std::make_shared<array<uint8_t, max_mbc3_rom_size>>();
+    rom_ifstream.read((char *)rom->data(), rom->size());
+    return std::make_shared<class Mbc3>(cartridge_type, rom, rom_path);
+  } else if (cartridge_type == Mbc5 || cartridge_type == Mbc5WithRam ||
+             cartridge_type == Mbc5WithRamAndBattery ||
+             cartridge_type == Mbc5WithRumble ||
+             cartridge_type == Mbc5WithRumbleAndRam ||
+             cartridge_type == Mbc5WithRumbleAndRamAndBattery) {
+    const auto rom = std::make_shared<array<uint8_t, max_mbc5_rom_size>>();
+    rom_ifstream.read((char *)rom->data(), rom->size());
+    return std::make_shared<class Mbc5>(cartridge_type, rom, rom_path);
   } else {
     std::stringstream unsupportted_type;
     unsupportted_type << "Not yet support the type " << std::hex
@@ -50,3 +67,6 @@ mmu::cartridge::Cartridge::powerUp(const string &rom_path) {
 template class mmu::cartridge::RomBasedCartridge<rom_only_cartrige_size, 0>;
 template class mmu::cartridge::RomBasedCartridge<max_mbc1_rom_size,
                                                  max_mbc1_ram_size>;
+// MBC3 has same ROM/RAM sizes as MBC1, no separate instantiation needed
+template class mmu::cartridge::RomBasedCartridge<max_mbc5_rom_size,
+                                                 max_mbc5_ram_size>;
