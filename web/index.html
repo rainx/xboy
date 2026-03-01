@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XBoy - Game Boy Emulator</title>
+    <title>XBoy — Game Boy Emulator</title>
     <link rel="stylesheet" href="css/xboy.css">
 </head>
 <body>
@@ -22,10 +22,11 @@
         <main>
             <div class="game-section">
                 <div class="drop-zone" id="drop-zone">
+                    <div class="drop-icon">&#9654;</div>
                     <div class="drop-text">
-                        <p>Drag & Drop ROM file here</p>
-                        <p>or</p>
-                        <button id="browse-rom" class="btn btn-secondary">Browse</button>
+                        <p>Drop a .gb or .gbc ROM here</p>
+                        <p class="drop-hint">or browse from your files</p>
+                        <button id="browse-rom" class="btn">Browse</button>
                     </div>
                 </div>
 
@@ -58,7 +59,7 @@
                     <div class="control-grid">
                         <div class="control-row">
                             <div class="key-control">
-                                <span class="key">↑</span>
+                                <span class="key">&#8593;</span>
                                 <span>Up</span>
                             </div>
                             <div class="key-control">
@@ -68,7 +69,7 @@
                         </div>
                         <div class="control-row">
                             <div class="key-control">
-                                <span class="key">←</span>
+                                <span class="key">&#8592;</span>
                                 <span>Left</span>
                             </div>
                             <div class="key-control">
@@ -78,21 +79,21 @@
                         </div>
                         <div class="control-row">
                             <div class="key-control">
-                                <span class="key">↓</span>
+                                <span class="key">&#8595;</span>
                                 <span>Down</span>
                             </div>
                             <div class="key-control">
-                                <span class="key">Enter</span>
+                                <span class="key">&#9166;</span>
                                 <span>Start</span>
                             </div>
                         </div>
                         <div class="control-row">
                             <div class="key-control">
-                                <span class="key">→</span>
+                                <span class="key">&#8594;</span>
                                 <span>Right</span>
                             </div>
                             <div class="key-control">
-                                <span class="key">Backspace</span>
+                                <span class="key">&#9003;</span>
                                 <span>Select</span>
                             </div>
                         </div>
@@ -102,7 +103,7 @@
                 <div class="settings">
                     <h3>Settings</h3>
                     <div class="setting-row">
-                        <label for="scale">Scale:</label>
+                        <label for="scale">Scale</label>
                         <select id="scale">
                             <option value="1">1x</option>
                             <option value="2">2x</option>
@@ -114,7 +115,7 @@
                     <div class="setting-row">
                         <label for="sound-enabled">
                             <input type="checkbox" id="sound-enabled" checked>
-                            Sound Enabled
+                            Sound
                         </label>
                     </div>
                 </div>
@@ -129,16 +130,16 @@
     <!-- Virtual controls for mobile -->
     <div class="virtual-controls" id="virtual-controls" style="display: none;">
         <div class="d-pad">
-            <button class="d-pad-btn" id="virtual-up">↑</button>
-            <button class="d-pad-btn" id="virtual-left">←</button>
-            <button class="d-pad-btn" id="virtual-down">↓</button>
-            <button class="d-pad-btn" id="virtual-right">→</button>
+            <button class="d-pad-btn" id="virtual-up">&#8593;</button>
+            <button class="d-pad-btn" id="virtual-left">&#8592;</button>
+            <button class="d-pad-btn" id="virtual-down">&#8595;</button>
+            <button class="d-pad-btn" id="virtual-right">&#8594;</button>
         </div>
         <div class="action-buttons">
             <button class="action-btn" id="virtual-a">A</button>
             <button class="action-btn" id="virtual-b">B</button>
-            <button class="action-btn" id="virtual-start">START</button>
-            <button class="action-btn" id="virtual-select">SELECT</button>
+            <button class="action-btn" id="virtual-start">ST</button>
+            <button class="action-btn" id="virtual-select">SE</button>
         </div>
     </div>
 
@@ -146,14 +147,12 @@
     <div class="loading-overlay" id="loading-overlay" style="display: none;">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p>Loading WebAssembly...</p>
+            <p>Loading&hellip;</p>
         </div>
     </div>
 
-    <!-- WebAssembly Module (must load first) -->
+    <!-- WebAssembly Module -->
     <script src="js/xboy-wasm.js"></script>
-    
-    <!-- Frontend Logic -->
     <script src="js/xboy.js"></script>
     <script src="js/rom-loader.js"></script>
     <script src="js/save-states.js"></script>

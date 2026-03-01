@@ -44,7 +44,7 @@ class SaveStateManager {
             const saveState = this.saveStates.get(slot);
             if (saveState) {
                 btn.title = `Slot ${slot}: ${saveState.name} - ${new Date(saveState.timestamp).toLocaleString()}`;
-                btn.style.background = this.hasDataInSlot(slot) ? 'rgba(102, 126, 234, 0.3)' : '';
+                btn.style.background = this.hasDataInSlot(slot) && slot !== this.currentSlot ? '#eef0f3' : '';
             } else {
                 btn.title = `Slot ${slot}: Empty`;
                 btn.style.background = '';
@@ -312,57 +312,47 @@ class SaveStateManager {
     }
 
     showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
-        
-        // Style the notification
+
+        const colors = {
+            success: '#1d1d1f',
+            error: '#ff3b30',
+            info: '#1d1d1f'
+        };
+
         Object.assign(notification.style, {
             position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            padding: '15px 20px',
-            borderRadius: '8px',
-            color: 'white',
-            fontWeight: 'bold',
+            top: '16px',
+            right: '16px',
+            padding: '10px 18px',
+            borderRadius: '10px',
+            color: '#fff',
+            fontSize: '13px',
+            fontWeight: '500',
+            fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
             zIndex: '3000',
             opacity: '0',
-            transform: 'translateY(20px)',
-            transition: 'all 0.3s ease'
+            transform: 'translateY(-8px) scale(0.98)',
+            transition: 'all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1)',
+            background: colors[type] || colors.info,
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)'
         });
 
-        // Set background color based on type
-        switch (type) {
-            case 'success':
-                notification.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-                break;
-            case 'error':
-                notification.style.background = 'linear-gradient(135deg, #f44336, #da190b)';
-                break;
-            default:
-                notification.style.background = 'linear-gradient(135deg, #2196F3, #0b7dda)';
-        }
-
-        // Add to document
         document.body.appendChild(notification);
 
-        // Animate in
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             notification.style.opacity = '1';
-            notification.style.transform = 'translateY(0)';
-        }, 10);
+            notification.style.transform = 'translateY(0) scale(1)';
+        });
 
-        // Remove after 3 seconds
         setTimeout(() => {
             notification.style.opacity = '0';
-            notification.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
+            notification.style.transform = 'translateY(-8px) scale(0.98)';
+            setTimeout(() => notification.remove(), 250);
+        }, 2500);
     }
 }
