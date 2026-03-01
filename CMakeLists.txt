@@ -35,11 +35,13 @@ if(EMSCRIPTEN)
     add_definitions(-DEMSCRIPTEN)
 else()
     # Native configuration
-    include(CTest)
-    include(GoogleTest)
-    find_package(GTest REQUIRED)
     find_package(SDL2 REQUIRED)
-    enable_testing()
+    include(CTest)
+    if(BUILD_TESTING)
+        include(GoogleTest)
+        find_package(GTest REQUIRED)
+        enable_testing()
+    endif()
 endif()
 
 # Core emulator sources (no SDL / platform code)
@@ -93,8 +95,8 @@ add_subdirectory(thirdparty/kaitai_struct_cpp_stl_runtime)
 target_link_libraries(xboy PRIVATE kaitai_struct_cpp_stl_runtime)
 target_include_directories(xboy PRIVATE ./thirdparty/kaitai_struct_cpp_stl_runtime)
 
-# Tests (only for native builds)
-if(NOT EMSCRIPTEN)
+# Tests (only for native builds with testing enabled)
+if(NOT EMSCRIPTEN AND BUILD_TESTING)
     file(GLOB TEST_SOURCES
         test/mmu/*.test.cpp
         test/cpu/*.test.cpp
