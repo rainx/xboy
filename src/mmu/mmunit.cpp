@@ -96,6 +96,14 @@ void mmu::Mmunit::set(const uint16_t &address, const uint8_t value) {
 
     io_[address - 0xFF00] = value;
 
+    // OAM DMA transfer: copy 160 bytes from (value << 8) to OAM
+    if (address == 0xFF46) {
+      uint16_t src = static_cast<uint16_t>(value) << 8;
+      for (uint16_t i = 0; i < 0xA0; i++) {
+        oam_[i] = get(src + i);
+      }
+    }
+
     // Serial transfer: capture output when SC triggers transfer
     if (address == 0xFF02 && value == 0x81) {
       serial_output_ += static_cast<char>(io_[0x01]); // SB = 0xFF01
