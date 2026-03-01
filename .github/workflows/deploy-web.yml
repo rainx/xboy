@@ -1,0 +1,49 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Build WASM
+        run: |
+          emcmake cmake -B build_web -DCMAKE_BUILD_TYPE=Release
+          cmake --build build_web --parallel
+
+      - name: Prepare deployment
+        run: |
+          # Copy WASM artifacts into web directory
+          cp build_web/xboy-wasm.js  web/js/
+          cp build_web/xboy-wasm.wasm web/js/
+          # Remove copyrighted ROM files
+          rm -rf web/assets/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

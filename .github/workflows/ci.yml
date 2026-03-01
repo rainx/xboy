@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  native-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libgtest-dev zlib1g-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Configure
+        run: emcmake cmake -B build_web -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build_web --parallel
+
+      - name: Verify WASM output
+        run: |
+          test -f build_web/xboy-wasm.js || { echo "xboy-wasm.js not found"; exit 1; }
+          test -f build_web/xboy-wasm.wasm || { echo "xboy-wasm.wasm not found"; exit 1; }
+          echo "WASM build artifacts verified successfully"

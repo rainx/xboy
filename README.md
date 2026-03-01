@@ -1,6 +1,12 @@
 # XBoy
 
-A Game Boy (DMG) emulator written in C++17.
+[![CI](https://github.com/rainx/xboy/actions/workflows/ci.yml/badge.svg)](https://github.com/rainx/xboy/actions/workflows/ci.yml)
+[![Release](https://github.com/rainx/xboy/actions/workflows/release.yml/badge.svg)](https://github.com/rainx/xboy/actions/workflows/release.yml)
+[![Deploy Web](https://github.com/rainx/xboy/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/rainx/xboy/actions/workflows/deploy-web.yml)
+
+A Game Boy (DMG) emulator written in C++17, with native SDL2 and WebAssembly builds.
+
+**[Play in your browser](https://rainx.github.io/xboy/)** — load any `.gb` ROM file and play instantly, no install required.
 
 ## Features
 
@@ -16,6 +22,11 @@ A Game Boy (DMG) emulator written in C++17.
 - **Save States**: F5 to save, F7 to load (binary format with magic header)
 - **Debugger**: Interactive CPU debugger with breakpoints, disassembly, memory inspection
 - **Test Runner**: Headless mode for running Blargg CPU test ROMs
+- **Web Version**: Full-featured browser-based emulator via WebAssembly
+  - Drag-and-drop ROM loading
+  - 4 save state slots
+  - Adjustable display scale (1x–5x)
+  - Virtual touch controls for mobile
 
 ## Controls
 
@@ -33,24 +44,49 @@ A Game Boy (DMG) emulator written in C++17.
 
 ## Build
 
-### Prerequisites (macOS)
+### Native (macOS)
 
-```
+```bash
 brew install cmake googletest sdl2
+mkdir build && cd build
+cmake ..
+make -j$(sysctl -n hw.ncpu)
+```
+
+### Native (Ubuntu / Debian)
+
+```bash
+sudo apt-get install cmake libsdl2-dev libgtest-dev zlib1g-dev
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+```
+
+### Native (Windows)
+
+```powershell
+vcpkg install sdl2:x64-windows gtest:x64-windows
+mkdir build && cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
+cmake --build . --config Release
+```
+
+### WebAssembly
+
+Requires [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html):
+
+```bash
+emcmake cmake -B build_web -DCMAKE_BUILD_TYPE=Release
+cmake --build build_web --parallel
+# Copy artifacts to web directory
+cp build_web/xboy-wasm.js build_web/xboy-wasm.wasm web/js/
+# Open web/index.html in a browser (use a local server for WASM)
 ```
 
 Optional (for cartridge header regeneration):
 
 ```
 brew install kaitai-struct-compiler
-```
-
-### Compile
-
-```
-mkdir build && cd build
-cmake ..
-make -j$(sysctl -n hw.ncpu)
 ```
 
 ### Run
@@ -74,7 +110,7 @@ make -j$(sysctl -n hw.ncpu)
 ### Test
 
 ```
-./xboy_test
+cd build && ctest --output-on-failure
 ```
 
 ## Architecture
@@ -119,8 +155,22 @@ src/
 ├── platform/
 │   ├── sdl_display.hpp/cpp  # SDL2 window + texture rendering
 │   ├── sdl_input.hpp/cpp    # Keyboard → Joypad mapping
-│   └── sdl_audio.hpp/cpp    # SDL2 audio output
-└── main.cpp             # Emulation loop + CLI
+│   ├── sdl_audio.hpp/cpp    # SDL2 audio output
+│   ├── web_display.hpp/cpp  # HTML5 Canvas rendering (Emscripten)
+│   ├── web_input.hpp/cpp    # Browser keyboard/gamepad input
+│   ├── web_audio.hpp/cpp    # Web Audio API output
+│   └── web_filesystem.hpp/cpp # Emscripten virtual filesystem
+├── main.cpp             # Native emulation loop + CLI
+└── web_main.cpp         # WebAssembly entry point
+
+web/
+├── index.html           # Emulator UI (drag-and-drop ROM loading)
+├── css/xboy.css         # Apple-inspired minimalist styling
+└── js/
+    ├── xboy.js          # Main emulator JavaScript logic
+    ├── rom-loader.js    # ROM file loading
+    ├── save-states.js   # Save state management
+    └── controls.js      # Input/keyboard handling
 ```
 
 ## Emulation Loop
@@ -169,3 +219,7 @@ Commands:
 - [x] Blargg CPU test ROM verification
 - [x] Save states
 - [x] Debugger
+- [x] WebAssembly — browser-based emulator with full feature parity
+- [x] CI/CD — automated builds, testing, and deployment
+- [ ] Game Boy Color (CGB) support
+- [ ] Game Link Cable (serial) emulation

@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            platform: macOS-arm64
+            install: brew install sdl2
+            build_dir: build
+            binary: xboy
+            archive: tar
+          - runner: ubuntu-latest
+            platform: Linux-x86_64
+            install: sudo apt-get update && sudo apt-get install -y libsdl2-dev zlib1g-dev
+            build_dir: build
+            binary: xboy
+            archive: tar
+          - runner: windows-latest
+            platform: Windows-x86_64
+            install: vcpkg install sdl2:x64-windows
+            build_dir: build
+            binary: Release/xboy.exe
+            archive: zip
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: >
+          cmake -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=OFF
+          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
+
+      - name: Configure (Unix)
+        if: runner.os != 'Windows'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+
+      - name: Build
+        run: cmake --build build --config Release --target xboy --parallel
+
+      - name: Package (tar.gz)
+        if: matrix.archive == 'tar'
+        run: |
+          mkdir -p staging
+          cp ${{ matrix.build_dir }}/${{ matrix.binary }} staging/
+          cd staging
+          tar czf ../xboy-${{ matrix.platform }}.tar.gz *
+
+      - name: Package (zip)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path staging -Force
+          Copy-Item "${{ matrix.build_dir }}/${{ matrix.binary }}" staging/
+          # Bundle SDL2.dll for Windows
+          $sdl2dll = Get-ChildItem -Path "$env:VCPKG_INSTALLATION_ROOT" -Recurse -Filter "SDL2.dll" | Where-Object { $_.FullName -match "x64-windows" } | Select-Object -First 1
+          if ($sdl2dll) { Copy-Item $sdl2dll.FullName staging/ }
+          Compress-Archive -Path staging/* -DestinationPath "xboy-${{ matrix.platform }}.zip"
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            xboy-*.tar.gz
+            xboy-*.zip
