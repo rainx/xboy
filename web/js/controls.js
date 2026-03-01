@@ -20,18 +20,20 @@ class ControlsManager {
     }
 
     getKeyMap() {
+        // Map directly from key to C++ enum input::Button integer value
+        // C++ enum: Right=0, Left=1, Up=2, Down=3, A=4, B=5, Select=6, Start=7
         return {
-            'ArrowUp': 'Up',
-            'ArrowDown': 'Down',
-            'ArrowLeft': 'Left',
-            'ArrowRight': 'Right',
-            'z': 'A',
-            'x': 'B',
-            'Z': 'A',
-            'X': 'B',
-            'Enter': 'Start',
-            'Backspace': 'Select',
-            ' ': 'Start'
+            'ArrowRight': 0,
+            'ArrowLeft': 1,
+            'ArrowUp': 2,
+            'ArrowDown': 3,
+            'z': 4,
+            'x': 5,
+            'Z': 4,
+            'X': 5,
+            'Backspace': 6,
+            'Enter': 7,
+            ' ': 7
         };
     }
 
@@ -102,29 +104,29 @@ class ControlsManager {
     }
 
     handleKeyDown(e) {
-        const button = this.keyMap[e.key];
-        if (!button) return;
-        
+        const buttonIndex = this.keyMap[e.key];
+        if (buttonIndex === undefined) return;
+
         // Prevent repeat key events
-        if (this.pressedKeys.has(button)) return;
-        
-        this.pressedKeys.add(button);
-        this.sendButtonState(button, true);
+        if (this.pressedKeys.has(buttonIndex)) return;
+
+        console.log('KeyDown:', e.key, '→ button index:', buttonIndex);
+        this.pressedKeys.add(buttonIndex);
+        this.sendButtonIndex(buttonIndex, true);
         e.preventDefault();
     }
 
     handleKeyUp(e) {
-        const button = this.keyMap[e.key];
-        if (!button) return;
-        
-        this.pressedKeys.delete(button);
-        this.sendButtonState(button, false);
+        const buttonIndex = this.keyMap[e.key];
+        if (buttonIndex === undefined) return;
+
+        this.pressedKeys.delete(buttonIndex);
+        this.sendButtonIndex(buttonIndex, false);
         e.preventDefault();
     }
 
     preventDefaultKeys(e) {
-        const button = this.keyMap[e.key];
-        if (button) {
+        if (this.keyMap[e.key] !== undefined) {
             e.preventDefault();
         }
     }
@@ -237,10 +239,14 @@ class ControlsManager {
         }
     }
 
+    sendButtonIndex(buttonIndex, pressed) {
+        if (!this.emulator.emulator) return;
+        this.emulator.emulator.setButtonState(buttonIndex, pressed);
+    }
+
     sendButtonState(button, pressed) {
         if (!this.emulator.emulator) return;
-        
-        // Convert button name to index for C++ binding
+        // Used by virtual controls and gamepad (which still use string names)
         const buttonIndex = this.getButtonIndex(button);
         if (buttonIndex !== -1) {
             this.emulator.emulator.setButtonState(buttonIndex, pressed);
@@ -248,24 +254,26 @@ class ControlsManager {
     }
 
     getButtonIndex(button) {
+        // Must match C++ enum input::Button
+        // Right=0, Left=1, Up=2, Down=3, A=4, B=5, Select=6, Start=7
         const buttonMap = {
-            'Up': 0,
-            'Down': 1,
-            'Left': 2,
-            'Right': 3,
+            'Right': 0,
+            'Left': 1,
+            'Up': 2,
+            'Down': 3,
             'A': 4,
             'B': 5,
-            'Start': 6,
-            'Select': 7
+            'Select': 6,
+            'Start': 7
         };
-        
-        return buttonMap[button] || -1;
+        const index = buttonMap[button];
+        return index !== undefined ? index : -1;
     }
 
     releaseAllButtons() {
-        // Release all keyboard buttons
-        this.pressedKeys.forEach(button => {
-            this.sendButtonState(button, false);
+        // Release all keyboard buttons (now stored as integer indices)
+        this.pressedKeys.forEach(buttonIndex => {
+            this.sendButtonIndex(buttonIndex, false);
         });
         this.pressedKeys.clear();
         

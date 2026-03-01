@@ -12,15 +12,24 @@ endif()
 
 # Platform-specific configuration
 if(EMSCRIPTEN)
-    # Emscripten settings
-    set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s USE_SDL=2")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EXPORTED_FUNCTIONS=_main,_malloc,_free")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EXPORTED_RUNTIME_METHODS=ccall,cwrap")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s MODULARIZE=1")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s EXPORT_NAME='XBoy'")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s WASM=1")
+    # Emscripten settings - output only JS and WASM, no HTML
+    set(EMSCRIPTEN_FLAGS "-s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -s EXPORTED_FUNCTIONS=_main,_malloc,_free")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -s EXPORTED_RUNTIME_METHODS=ccall,cwrap,FS")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -s FORCE_FILESYSTEM=1")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -s MODULARIZE=1 -s EXPORT_NAME='XBoyWASM'")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -s WASM=1")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} --bind")
+    
+    # Enable exceptions for proper error handling
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+    set(EMSCRIPTEN_FLAGS "${EMSCRIPTEN_FLAGS} -fexceptions")
+    
+    # Output file name: xboy-wasm.js and xboy-wasm.wasm
+    set(CMAKE_EXECUTABLE_SUFFIX "-wasm.js")
+    
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EMSCRIPTEN_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMSCRIPTEN_FLAGS}")
     
     # Define for conditional compilation
     add_definitions(-DEMSCRIPTEN)
@@ -55,7 +64,6 @@ if(EMSCRIPTEN)
         src/platform/web_audio.cpp
         src/platform/web_input.cpp
         src/platform/web_filesystem.cpp
-        bindings.cpp
     )
 else()
     set(PLATFORM_SOURCES
@@ -66,7 +74,11 @@ else()
 endif()
 
 # Main executable
-add_executable(xboy src/main.cpp)
+if(EMSCRIPTEN)
+    add_executable(xboy src/web_main.cpp)
+else()
+    add_executable(xboy src/main.cpp)
+endif()
 target_sources(xboy PRIVATE ${CORE_SOURCES} ${PLATFORM_SOURCES})
 target_include_directories(xboy PRIVATE ./src)
 

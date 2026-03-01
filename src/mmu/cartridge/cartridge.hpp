@@ -117,7 +117,7 @@ public:
       : Cartridge(cartridge_type, rom_path), rom_(rom), ram_(ram){};
   ~RomBasedCartridge(){};
 
-  virtual uint8_t get(const u_int16_t &address) const override {
+  virtual uint8_t get(const uint16_t &address) const override {
     return (*rom_)[address];
   };
   virtual void set(const uint16_t &address, const uint8_t value) override {

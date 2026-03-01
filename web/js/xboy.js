@@ -37,22 +37,38 @@ class XBoyEmulator {
 
     async loadRom(file) {
         try {
+            console.log('Loading ROM:', file.name, 'Size:', file.size);
             this.romData = await this.readFileAsArray(file);
+            console.log('ROM data loaded, length:', this.romData.length);
             this.updateRomName(file.name);
             this.enableEmulationControls();
             
             // Try to create emulator instance
-            if (window.XBoy) {
-                const module = await window.XBoy();
-                this.emulator = new module.WebEmulator(this.romData);
+            if (window.XBoyWASM) {
+                console.log('XBoyWASM module found, loading...');
+                const module = await window.XBoyWASM({
+                    canvas: document.getElementById('game-canvas'),
+                    doNotCaptureKeyboard: true
+                });
+                console.log('Module loaded, writing ROM to virtual FS...');
+                // Write ROM bytes directly to Emscripten's virtual filesystem
+                // to avoid UTF-8 corruption from embind string conversion
+                const romPath = '/tmp/temp_rom.gb';
+                module.FS.writeFile(romPath, this.romData);
+                console.log('ROM written to virtual FS, creating WebEmulator instance...');
+                this.emulator = new module.WebEmulator(romPath);
+                console.log('WebEmulator created successfully');
                 this.showGameDisplay();
+                this.startEmulation();
                 return true;
             } else {
+                console.error('XBoyWASM module not found');
                 this.showError('WebAssembly module not loaded. Please wait and try again.');
                 return false;
             }
         } catch (error) {
             console.error('Failed to load ROM:', error);
+            console.error('Error stack:', error.stack);
             this.showError('Failed to load ROM: ' + error.message);
             return false;
         }
@@ -61,9 +77,13 @@ class XBoyEmulator {
     readFileAsArray(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
+            reader.onload = () => {
+                const arrayBuffer = reader.result;
+                const uint8Array = new Uint8Array(arrayBuffer);
+                resolve(uint8Array);
+            };
             reader.onerror = reject;
-            reader.readAsBinaryString(file);
+            reader.readAsArrayBuffer(file);
         });
     }
 
@@ -103,9 +123,14 @@ class XBoyEmulator {
 
     async loadRomFromData(romData) {
         try {
-            if (window.XBoy) {
-                const module = await window.XBoy();
-                this.emulator = new module.WebEmulator(romData);
+            if (window.XBoyWASM) {
+                const module = await window.XBoyWASM({
+                    canvas: document.getElementById('game-canvas'),
+                    doNotCaptureKeyboard: true
+                });
+                const romPath = '/tmp/temp_rom.gb';
+                module.FS.writeFile(romPath, romData);
+                this.emulator = new module.WebEmulator(romPath);
             }
         } catch (error) {
             console.error('Failed to reset ROM:', error);
@@ -247,40 +272,7 @@ class XBoyEmulator {
             this.setScale(parseInt(e.target.value));
         });
 
-        // Keyboard events
-        this.setupKeyboardControls();
-    }
-
-    setupKeyboardControls() {
-        const keyMap = {
-            'ArrowUp': 'Up',
-            'ArrowDown': 'Down',
-            'ArrowLeft': 'Left',
-            'ArrowRight': 'Right',
-            'z': 'A',
-            'x': 'B',
-            'Enter': 'Start',
-            'Backspace': 'Select'
-        };
-
-        const keyDownHandler = (e) => {
-            const button = keyMap[e.key];
-            if (button && this.emulator) {
-                this.emulator.setButtonState(button, true);
-                e.preventDefault();
-            }
-        };
-
-        const keyUpHandler = (e) => {
-            const button = keyMap[e.key];
-            if (button && this.emulator) {
-                this.emulator.setButtonState(button, false);
-                e.preventDefault();
-            }
-        };
-
-        document.addEventListener('keydown', keyDownHandler);
-        document.addEventListener('keyup', keyUpHandler);
+        // Keyboard input is handled by ControlsManager in controls.js
     }
 
     // Button mapping for virtual controls
