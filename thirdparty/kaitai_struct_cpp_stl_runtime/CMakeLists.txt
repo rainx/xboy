@@ -26,7 +26,7 @@ set (SOURCES
 
 set(STRING_ENCODING_TYPE "ICONV" CACHE STRING "Set the way strings have to be encoded (ICONV|NONE|...)")
 
-add_library (${PROJECT_NAME} SHARED ${HEADERS} ${SOURCES})
+add_library (${PROJECT_NAME} ${HEADERS} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "kaitai/kaitaistream.h;kaitai/kaitaistruct.h")
 
 if (ZLIB_FOUND)
