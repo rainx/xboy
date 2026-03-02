@@ -66,5 +66,6 @@ CMakeUserPresets.json
 /build_web
 /roms
 web/assets/*.gb
+.DS_Store
 
 !kaitai-struct/Makefile
